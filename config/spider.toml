@@ -1,0 +1,97 @@
+# Hardware and calibration for the showcase robot. Servo targets are ticks
+# (normally 0-1000). Start with the robot supported above the floor and tune
+# each neutral/direction/limit before walking under its own weight.
+
+[bus]
+port = "/dev/ttyACM0"
+baudrate = 115200
+timeout = 0.05
+discard_echo = false
+broadcast_id = 254
+
+[gait]
+phase_duration = 0.45
+sweep_ticks = 100.0
+lift_femur_offset = -100.0
+lift_tibia_offset = 0.0
+stand_femur_offset = 0.0
+stand_tibia_offset = -100.0
+sit_femur_offset = -200.0
+sit_tibia_offset = -300.0
+
+# Leg order follows the original bachelor code: IDs 1-12 are the left side,
+# front to rear; IDs 13-24 are the right side, front to rear. Mount angles use
+# x=forward and y=left. Inner legs use a smaller coxa sweep, matching the old
+# HPos (corner) versus Pos (inner) movements.
+
+[[legs]]
+name = "front_left"
+mount_angle_degrees = 45.0
+gait_group = 0
+sweep_scale = 1.0
+coxa = { servo_id = 1, neutral = 500, minimum = 300, maximum = 700, direction = 1 }
+femur = { servo_id = 2, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 3, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "middle_front_left"
+mount_angle_degrees = 75.0
+gait_group = 1
+sweep_scale = 0.42
+coxa = { servo_id = 4, neutral = 500, minimum = 350, maximum = 650, direction = 1 }
+femur = { servo_id = 5, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 6, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "middle_rear_left"
+mount_angle_degrees = 105.0
+gait_group = 0
+sweep_scale = 0.42
+coxa = { servo_id = 7, neutral = 500, minimum = 350, maximum = 650, direction = 1 }
+femur = { servo_id = 8, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 9, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "rear_left"
+mount_angle_degrees = 135.0
+gait_group = 1
+sweep_scale = 1.0
+coxa = { servo_id = 10, neutral = 500, minimum = 300, maximum = 700, direction = 1 }
+femur = { servo_id = 11, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 12, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "rear_right"
+mount_angle_degrees = -45.0
+gait_group = 1
+sweep_scale = 1.0
+coxa = { servo_id = 13, neutral = 500, minimum = 300, maximum = 700, direction = 1 }
+femur = { servo_id = 14, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 15, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "middle_rear_right"
+mount_angle_degrees = -75.0
+gait_group = 0
+sweep_scale = 0.42
+coxa = { servo_id = 16, neutral = 500, minimum = 350, maximum = 650, direction = 1 }
+femur = { servo_id = 17, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 18, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "middle_front_right"
+mount_angle_degrees = -105.0
+gait_group = 1
+sweep_scale = 0.42
+coxa = { servo_id = 19, neutral = 500, minimum = 350, maximum = 650, direction = 1 }
+femur = { servo_id = 20, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 21, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
+
+[[legs]]
+name = "front_right"
+mount_angle_degrees = -135.0
+gait_group = 0
+sweep_scale = 1.0
+coxa = { servo_id = 22, neutral = 500, minimum = 300, maximum = 700, direction = 1 }
+femur = { servo_id = 23, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
+tibia = { servo_id = 24, neutral = 500, minimum = 150, maximum = 700, direction = 1 }

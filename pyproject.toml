@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uia-spider-robot"
+version = "0.1.0"
+description = "Layered control software for the UiA eight-legged spider robot"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyserial>=3.5,<4",
+]
+
+[project.scripts]
+spider-robot = "spider_robot.cli:main"
+
+[tool.setuptools]
+packages = ["spider_robot", "hiwonderbuslinker"]
+package-dir = {spider_robot = "src/spider_robot", hiwonderbuslinker = "tools/hiwonderbuslinker"}
