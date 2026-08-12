@@ -35,12 +35,32 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="run without serial hardware and print a command summary",
     )
+    parser.add_argument(
+        "--show-targets",
+        action="store_true",
+        help="print final joint targets after a simulated command",
+    )
 
     actions = parser.add_subparsers(dest="action", required=True)
     stand = actions.add_parser("stand", help="move all legs to the standing pose")
     stand.add_argument("--duration", type=float, default=1.0)
     sit = actions.add_parser("sit", help="move all legs to the sitting pose")
     sit.add_argument("--duration", type=float, default=1.5)
+    dead = actions.add_parser(
+        "dead",
+        aliases=["storage"],
+        help="curl the legs underneath the body for storage",
+    )
+    dead.add_argument(
+        "--duration",
+        type=float,
+        help="override the configured final curl duration",
+    )
+    dead.add_argument(
+        "--approach-duration",
+        type=float,
+        help="override the configured sitting approach duration",
+    )
 
     walk = actions.add_parser("walk", help="walk in a named direction")
     walk.add_argument("direction", choices=DIRECTIONS)
@@ -69,7 +89,10 @@ def _scaled(command: MotionCommand, strength: float) -> MotionCommand:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.show_targets and not args.simulate:
+        parser.error("--show-targets requires --simulate")
     config = load_config(args.config)
     if args.port:
         config = replace(config, bus=replace(config.bus, port=args.port))
@@ -86,6 +109,8 @@ def main(argv: list[str] | None = None) -> int:
             controller.stand(args.duration)
         elif args.action == "sit":
             controller.sit(args.duration)
+        elif args.action in {"dead", "storage"}:
+            controller.dead(args.duration, args.approach_duration)
         elif args.action == "walk":
             controller.walk(_scaled(DIRECTIONS[args.direction], args.strength), args.cycles)
         elif args.action == "move":
@@ -114,6 +139,14 @@ def main(argv: list[str] | None = None) -> int:
             assert isinstance(bus, SimulationBus)
             staged = sum(len(frame) for frame in bus.history)
             print(f"Simulation complete: {len(bus.history)} frames, {staged} servo targets")
+            if args.show_targets and bus.history:
+                for leg in config.legs:
+                    print(
+                        f"{leg.name:18} "
+                        f"coxa={bus.positions[leg.coxa.servo_id]:4} "
+                        f"femur={bus.positions[leg.femur.servo_id]:4} "
+                        f"tibia={bus.positions[leg.tibia.servo_id]:4}"
+                    )
         bus.close()
     return 0
 

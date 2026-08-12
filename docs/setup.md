@@ -68,6 +68,7 @@ First verify the code path without hardware:
 ```sh
 spider-robot --simulate stand
 spider-robot --simulate walk forward --cycles 1
+spider-robot --simulate --show-targets dead
 ```
 
 Then support the robot above the floor and run one real pose at a slow pace:
@@ -86,6 +87,19 @@ spider-robot walk forward --cycles 1 --strength 0.3
 
 Increase strength gradually. Tune `phase_duration`, `sweep_ticks`, lift offsets,
 and individual `sweep_scale` values in `config/spider.toml`.
+
+## 5. Calibrate the storage pose
+
+The `dead` command first sits the robot and then curls its legs beneath the
+body. Do not test it until sitting is reliable, and keep the chassis supported:
+
+```sh
+spider-robot dead --approach-duration 4 --duration 5
+```
+
+It deliberately leaves the servos loaded after reaching the pose. Support the
+robot before disconnecting servo power for storage. Fine-tune the common and
+per-leg offsets using [the dead-pose guide](poses.md).
 
 ## Emergency behavior
 

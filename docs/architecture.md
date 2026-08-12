@@ -69,6 +69,7 @@ on this class instead of individual servo IDs.
 
 - serial settings and broadcast ID;
 - gait timing, lift height, stance, and sitting offsets;
+- the dead/storage pose, transition timing, and optional per-leg overrides;
 - leg names, mounting angles, and alternating gait groups;
 - joint servo IDs, neutral ticks, safe limits, and direction signs.
 

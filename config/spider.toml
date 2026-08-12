@@ -19,6 +19,24 @@ stand_tibia_offset = -100.0
 sit_femur_offset = -200.0
 sit_tibia_offset = -300.0
 
+# Storage configuration. The dead command first moves through the sitting pose,
+# then applies these logical offsets from each joint's neutral tick. These are
+# unverified starting values inferred from the old sitting pose; tune them on a
+# supported robot before relying on the pose for storage.
+[dead_pose]
+approach_duration = 2.0
+duration = 3.0
+coxa_offset = 0.0
+femur_offset = -250.0
+tibia_offset = -330.0
+
+# Optional per-leg overrides inherit unspecified values from [dead_pose].
+# Uncomment and tune only the joints that need different clearance:
+# [dead_pose.legs.front_left]
+# coxa_offset = 10.0
+# femur_offset = -240.0
+# tibia_offset = -320.0
+
 # Leg order follows the original bachelor code: IDs 1-12 are the left side,
 # front to rear; IDs 13-24 are the right side, front to rear. Mount angles use
 # x=forward and y=left. Inner legs use a smaller coxa sweep, matching the old

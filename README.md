@@ -24,17 +24,25 @@ spider-robot walk left --cycles 2
 spider-robot walk turn-right --cycles 2
 spider-robot move --x 0.8 --y 0.2 --yaw -0.1 --cycles 2
 spider-robot sit
+spider-robot dead
 spider-robot stop
 ```
 
 `--cycles 0` walks until Ctrl-C. Use `--port /dev/ttyUSB0` to override the
-configured port.
+configured port. `dead` (also available as `storage`) first sits the robot and
+then curls all legs beneath the body for storage. Preview its final servo
+targets without hardware before tuning or using it:
+
+```sh
+spider-robot --simulate --show-targets dead
+```
 
 ## Documentation
 
 - [Architecture and ROS 2 path](docs/architecture.md)
 - [Installation, wiring, and calibration](docs/setup.md)
 - [Motion model and command reference](docs/motion.md)
+- [Dead/storage pose and fine-tuning](docs/poses.md)
 - [Initial setup tools](setup/README.md)
 
 The original showcase programs remain in `src/bachelor/` as reference material;

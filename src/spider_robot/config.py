@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 import tomllib
@@ -93,10 +93,47 @@ class GaitConfig:
 
 
 @dataclass(frozen=True)
+class PoseOffsets:
+    """Logical joint offsets from each servo's calibrated neutral tick."""
+
+    coxa: float = 0.0
+    femur: float = 0.0
+    tibia: float = 0.0
+
+
+@dataclass(frozen=True)
+class DeadPoseConfig:
+    """Storage pose and its safe transition timing.
+
+    Values in ``legs`` replace the default offsets for one named leg. Missing
+    values in a TOML leg override inherit from ``default`` during loading.
+    """
+
+    default: PoseOffsets = field(
+        default_factory=lambda: PoseOffsets(coxa=0.0, femur=-250.0, tibia=-330.0)
+    )
+    approach_duration: float = 2.0
+    duration: float = 3.0
+    legs: dict[str, PoseOffsets] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        for name, duration in (
+            ("approach_duration", self.approach_duration),
+            ("duration", self.duration),
+        ):
+            if not 0 < duration <= 30:
+                raise ValueError(f"dead_pose {name} must be in (0, 30] seconds")
+
+    def for_leg(self, leg_name: str) -> PoseOffsets:
+        return self.legs.get(leg_name, self.default)
+
+
+@dataclass(frozen=True)
 class RobotConfig:
     bus: BusConfig
     gait: GaitConfig
     legs: tuple[LegConfig, ...]
+    dead_pose: DeadPoseConfig = field(default_factory=DeadPoseConfig)
 
     def __post_init__(self) -> None:
         if not self.legs:
@@ -118,6 +155,24 @@ class RobotConfig:
         if groups != {0, 1}:
             raise ValueError("both gait groups 0 and 1 must contain at least one leg")
 
+        unknown_dead_pose_legs = self.dead_pose.legs.keys() - set(names)
+        if unknown_dead_pose_legs:
+            raise ValueError(
+                "dead_pose contains unknown leg overrides: "
+                f"{sorted(unknown_dead_pose_legs)}"
+            )
+
+        # Reject an unsafe storage pose when configuration is loaded, rather
+        # than after some servo targets have already been transmitted.
+        for leg in self.legs:
+            offsets = self.dead_pose.for_leg(leg.name)
+            try:
+                leg.coxa.resolve(offsets.coxa)
+                leg.femur.resolve(offsets.femur)
+                leg.tibia.resolve(offsets.tibia)
+            except ValueError as error:
+                raise ValueError(f"dead_pose for {leg.name}: {error}") from error
+
 
 def _joint(data: dict[str, Any]) -> JointConfig:
     return JointConfig(
@@ -126,6 +181,17 @@ def _joint(data: dict[str, Any]) -> JointConfig:
         minimum=int(data.get("minimum", 0)),
         maximum=int(data.get("maximum", 1000)),
         direction=int(data.get("direction", 1)),
+    )
+
+
+def _pose_offsets(
+    data: dict[str, Any], defaults: PoseOffsets | None = None
+) -> PoseOffsets:
+    defaults = defaults or PoseOffsets()
+    return PoseOffsets(
+        coxa=float(data.get("coxa_offset", defaults.coxa)),
+        femur=float(data.get("femur_offset", defaults.femur)),
+        tibia=float(data.get("tibia_offset", defaults.tibia)),
     )
 
 
@@ -138,6 +204,7 @@ def load_config(path: str | Path) -> RobotConfig:
 
     bus_data = data.get("bus", {})
     gait_data = data.get("gait", {})
+    dead_pose_data = data.get("dead_pose", {})
     legs_data = data.get("legs", [])
 
     bus = BusConfig(
@@ -157,6 +224,19 @@ def load_config(path: str | Path) -> RobotConfig:
         sit_femur_offset=float(gait_data.get("sit_femur_offset", -200.0)),
         sit_tibia_offset=float(gait_data.get("sit_tibia_offset", -300.0)),
     )
+    dead_pose_defaults = _pose_offsets(
+        dead_pose_data,
+        PoseOffsets(coxa=0.0, femur=-250.0, tibia=-330.0),
+    )
+    dead_pose = DeadPoseConfig(
+        default=dead_pose_defaults,
+        approach_duration=float(dead_pose_data.get("approach_duration", 2.0)),
+        duration=float(dead_pose_data.get("duration", 3.0)),
+        legs={
+            str(leg_name): _pose_offsets(leg_offsets, dead_pose_defaults)
+            for leg_name, leg_offsets in dead_pose_data.get("legs", {}).items()
+        },
+    )
     legs = tuple(
         LegConfig(
             name=str(leg["name"]),
@@ -169,4 +249,4 @@ def load_config(path: str | Path) -> RobotConfig:
         )
         for leg in legs_data
     )
-    return RobotConfig(bus=bus, gait=gait, legs=legs)
+    return RobotConfig(bus=bus, gait=gait, dead_pose=dead_pose, legs=legs)

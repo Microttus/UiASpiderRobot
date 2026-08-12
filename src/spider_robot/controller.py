@@ -65,6 +65,43 @@ class SpiderController:
         if wait:
             self._sleep(duration)
 
+    def dead(
+        self,
+        duration: float | None = None,
+        approach_duration: float | None = None,
+        wait: bool = True,
+    ) -> None:
+        """Curl all legs underneath in preparation for unpowered storage.
+
+        The robot first moves through its sitting pose to avoid folding from an
+        arbitrary gait phase. This method only positions the legs; it does not
+        unload the servos or disconnect electrical power.
+        """
+
+        dead_pose = self.config.dead_pose
+        curl_duration = dead_pose.duration if duration is None else duration
+        sit_duration = (
+            dead_pose.approach_duration
+            if approach_duration is None
+            else approach_duration
+        )
+        for name, value in (
+            ("dead pose duration", curl_duration),
+            ("dead pose approach duration", sit_duration),
+        ):
+            if not 0 < value <= 30:
+                raise ValueError(f"{name} must be in (0, 30] seconds")
+
+        # The approach must finish before the tighter storage curl is staged.
+        self.sit(duration=sit_duration, wait=True)
+        poses: dict[str, LegPose] = {}
+        for leg in self.legs:
+            offsets = dead_pose.for_leg(leg.name)
+            poses[leg.name] = LegPose(offsets.coxa, offsets.femur, offsets.tibia)
+        self._apply(poses, curl_duration)
+        if wait:
+            self._sleep(curl_duration)
+
     def step(self, command: MotionCommand) -> None:
         """Execute one complete four-phase gait cycle."""
 

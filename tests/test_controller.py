@@ -32,13 +32,48 @@ class ControllerTests(unittest.TestCase):
         self.assertTrue(all(len(frame) == 24 for frame in self.bus.history))
         self.assertEqual(self.waits, [self.config.gait.phase_duration] * 4)
 
+    def test_dead_pose_sits_then_curls_in_synchronized_frames(self) -> None:
+        self.controller.dead()
+
+        self.assertEqual(len(self.bus.history), 2)
+        self.assertTrue(all(len(frame) == 24 for frame in self.bus.history))
+        self.assertEqual(
+            self.waits,
+            [
+                self.config.dead_pose.approach_duration,
+                self.config.dead_pose.duration,
+            ],
+        )
+
+        final_targets = {
+            command.servo_id: command.ticks for command in self.bus.history[-1]
+        }
+        first_leg = self.config.legs[0]
+        offsets = self.config.dead_pose.for_leg(first_leg.name)
+        self.assertEqual(
+            final_targets[first_leg.coxa.servo_id],
+            first_leg.coxa.resolve(offsets.coxa),
+        )
+        self.assertEqual(
+            final_targets[first_leg.femur.servo_id],
+            first_leg.femur.resolve(offsets.femur),
+        )
+        self.assertEqual(
+            final_targets[first_leg.tibia.servo_id],
+            first_leg.tibia.resolve(offsets.tibia),
+        )
+
     def test_mount_angles_create_directional_coxa_targets(self) -> None:
         gait = AlternatingTetrapodGait(self.config.gait, self.config.legs)
         frames = gait.frames(MotionCommand(linear_x=1.0))
 
-        # Compare each leg while it is the swinging group.
-        self.assertGreater(frames[0].poses["front_left"].coxa, 0)
-        self.assertLess(frames[2].poses["front_right"].coxa, 0)
+        # Compare each leg in the frame where its configured group is swinging.
+        front_left = next(leg for leg in self.config.legs if leg.name == "front_left")
+        front_right = next(leg for leg in self.config.legs if leg.name == "front_right")
+        left_swing_frame = 0 if front_left.gait_group == 0 else 2
+        right_swing_frame = 0 if front_right.gait_group == 0 else 2
+        self.assertGreater(frames[left_swing_frame].poses[front_left.name].coxa, 0)
+        self.assertLess(frames[right_swing_frame].poses[front_right.name].coxa, 0)
 
     def test_zero_command_stops_without_staging_motion(self) -> None:
         self.controller.walk(MotionCommand(), cycles=1)
@@ -49,6 +84,13 @@ class ControllerTests(unittest.TestCase):
     def test_invalid_duration_is_rejected_before_staging(self) -> None:
         with self.assertRaisesRegex(ValueError, "duration"):
             self.controller.stand(duration=31)
+
+        self.assertEqual(self.bus.pending, [])
+        self.assertEqual(self.bus.history, [])
+
+    def test_invalid_dead_duration_is_rejected_before_approach(self) -> None:
+        with self.assertRaisesRegex(ValueError, "dead pose duration"):
+            self.controller.dead(duration=31)
 
         self.assertEqual(self.bus.pending, [])
         self.assertEqual(self.bus.history, [])

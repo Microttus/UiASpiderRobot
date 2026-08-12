@@ -47,10 +47,11 @@ independent immediate writes.
 
 1. Joint IDs, neutral ticks, directions, and safe limits.
 2. Standing and sitting femur/tibia offsets.
-3. Lift offsets, with the robot supported.
-4. `sweep_ticks` at low `--strength`.
-5. Individual `sweep_scale` and mounting angles.
-6. `phase_duration` after the geometry is reliable.
+3. Dead/storage offsets, using the procedure in [poses.md](poses.md).
+4. Lift offsets, with the robot supported.
+5. `sweep_ticks` at low `--strength`.
+6. Individual `sweep_scale` and mounting angles.
+7. `phase_duration` after the geometry is reliable.
 
 Direction strength scales stride size. `phase_duration` controls phase timing;
 larger values move more slowly. Configuration validation rejects duplicate IDs,
