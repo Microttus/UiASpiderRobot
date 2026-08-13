@@ -65,7 +65,7 @@ name = "middle_rear_left"
 mount_angle_degrees = 105.0
 gait_group = 0
 sweep_scale = 0.42
-coxa = { servo_id = 7, neutral = 500, minimum = 350, maximum = 650, direction = 1 }
+coxa = { servo_id = 7, neutral = 500, minimum = 350, maximum = 550, direction = 1 }
 femur = { servo_id = 8, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
 tibia = { servo_id = 9, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
 
