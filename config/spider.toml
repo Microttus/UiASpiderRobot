@@ -53,19 +53,19 @@ tibia = { servo_id = 3, neutral = 500, minimum = 150, maximum = 700, direction =
 
 [[legs]]
 name = "middle_front_left"
-mount_angle_degrees = 75.0
+mount_angle_degrees = 90.0
 gait_group = 1
 sweep_scale = 0.42
-coxa = { servo_id = 4, neutral = 525, minimum = 375, maximum = 675, direction = 1 }
+coxa = { servo_id = 4, neutral = 540, minimum = 390, maximum = 690, direction = 1 }
 femur = { servo_id = 5, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
 tibia = { servo_id = 6, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
 
 [[legs]]
 name = "middle_rear_left"
-mount_angle_degrees = 105.0
+mount_angle_degrees = 90
 gait_group = 0
 sweep_scale = 0.42
-coxa = { servo_id = 7, neutral = 475, minimum = 325, maximum = 625, direction = 1 }
+coxa = { servo_id = 7, neutral = 460, minimum = 310, maximum = 610, direction = 1 }
 femur = { servo_id = 8, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
 tibia = { servo_id = 9, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
 
@@ -89,19 +89,19 @@ tibia = { servo_id = 15, neutral = 500, minimum = 150, maximum = 700, direction 
 
 [[legs]]
 name = "middle_rear_right"
-mount_angle_degrees = -75.0
+mount_angle_degrees = -90.0
 gait_group = 0
 sweep_scale = 0.42
-coxa = { servo_id = 16, neutral = 525, minimum = 375, maximum = 675, direction = 1 }
+coxa = { servo_id = 16, neutral = 540, minimum = 390, maximum = 690, direction = 1 }
 femur = { servo_id = 17, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
 tibia = { servo_id = 18, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
 
 [[legs]]
 name = "middle_front_right"
-mount_angle_degrees = -105.0
+mount_angle_degrees = -90.0
 gait_group = 1
 sweep_scale = 0.42
-coxa = { servo_id = 19, neutral = 475, minimum = 325, maximum = 625, direction = 1 }
+coxa = { servo_id = 19, neutral = 460, minimum = 310, maximum = 610, direction = 1 }
 femur = { servo_id = 20, neutral = 500, minimum = 200, maximum = 750, direction = 1 }
 tibia = { servo_id = 21, neutral = 500, minimum = 150, maximum = 700, direction = 1 }
 
