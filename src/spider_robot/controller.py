@@ -140,5 +140,27 @@ class SpiderController:
     def set_powered(self, powered: bool) -> None:
         self.bus.set_powered(powered)
 
+    def set_servo_position(self, leg_name: str, joint_type: str, position: float) -> None:
+        """Set individual servo position for a specific leg and joint type."""
+        if leg_name not in self._legs_by_name:
+            raise ValueError(f"Unknown leg name: {leg_name}")
+        
+        leg = self._legs_by_name[leg_name]
+        leg.set_position(joint_type, position)
+        
+    def set_all_servo_positions(self, positions: dict[str, dict[str, float]]) -> None:
+        """Set servo positions for all legs at once."""
+        for leg_name, joint_positions in positions.items():
+            if leg_name not in self._legs_by_name:
+                raise ValueError(f"Unknown leg name: {leg_name}")
+            
+            leg = self._legs_by_name[leg_name]
+            for joint_type, position in joint_positions.items():
+                leg.set_position(joint_type, position)
+                
+    def stop_movement(self) -> None:
+        """Stop all movement and immediately halt servos."""
+        self.stop()
+
 
 __all__ = ["MotionCommand", "SpiderController"]

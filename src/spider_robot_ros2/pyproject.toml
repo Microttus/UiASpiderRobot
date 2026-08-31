@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spider_robot_ros2"
+version = "0.1.0"
+description = "ROS2 integration for UiA Spider Robot"
+authors = [
+    {name = "UiA Robotics Team"}
+]
+dependencies = [
+    "rclpy",
+    "geometry_msgs",
+    "std_msgs",
+    "spider-robot @ file:///${PROJECT_ROOT}/src/spider_robot",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+spider_robot_node = "spider_robot_ros2.twist_controller:main"

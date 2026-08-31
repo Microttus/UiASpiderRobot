@@ -62,3 +62,20 @@ class Leg:
             femur=int(round(self.bus.read_position(self.config.femur.servo_id))),
             tibia=int(round(self.bus.read_position(self.config.tibia.servo_id))),
         )
+
+    def set_position(self, joint_type: str, position: float) -> None:
+        """Set individual servo position directly."""
+        if joint_type == "coxa":
+            servo_id = self.config.coxa.servo_id
+            resolved_position = self.config.coxa.resolve(position)
+        elif joint_type == "femur":
+            servo_id = self.config.femur.servo_id
+            resolved_position = self.config.femur.resolve(position)
+        elif joint_type == "tibia":
+            servo_id = self.config.tibia.servo_id
+            resolved_position = self.config.tibia.resolve(position)
+        else:
+            raise ValueError(f"Unknown joint type: {joint_type}")
+            
+        # Set the position directly without duration (for immediate control)
+        self.bus.stage_position(servo_id, resolved_position, 0.1)  # 0.1s duration
