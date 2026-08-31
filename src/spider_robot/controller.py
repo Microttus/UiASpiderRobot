@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 
 from .config import RobotConfig
-from .gait import AlternatingTetrapodGait, MotionCommand
+from .gait import AlternatingTetrapodGait, MotionCommand, RippleGait, TripodGait
 from .hardware import ServoBus
 from .leg import Leg, LegPose, ResolvedLegPose
 
@@ -19,12 +19,21 @@ class SpiderController:
         config: RobotConfig,
         bus: ServoBus,
         sleep: Callable[[float], None] = time.sleep,
+        gait_type: str = "alternating_tetrapod"
     ) -> None:
         self.config = config
         self.bus = bus
         self.legs = tuple(Leg(leg_config, bus) for leg_config in config.legs)
         self._legs_by_name = {leg.name: leg for leg in self.legs}
-        self._gait = AlternatingTetrapodGait(config.gait, config.legs)
+        
+        # Initialize gait based on type
+        if gait_type == "ripple":
+            self._gait = RippleGait(config.gait, config.legs)
+        elif gait_type == "tripod":
+            self._gait = TripodGait(config.gait, config.legs)
+        else:
+            self._gait = AlternatingTetrapodGait(config.gait, config.legs)
+            
         self._sleep = sleep
 
     def _apply(self, poses: dict[str, LegPose], duration: float) -> None:
@@ -103,8 +112,7 @@ class SpiderController:
             self._sleep(curl_duration)
 
     def step(self, command: MotionCommand) -> None:
-        """Execute one complete four-phase gait cycle."""
-
+        """Execute one complete gait cycle."""
         for frame in self._gait.frames(command):
             self._apply(frame.poses, frame.duration)
             self._sleep(frame.duration)

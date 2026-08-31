@@ -40,6 +40,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="print final joint targets after a simulated command",
     )
+    parser.add_argument(
+        "--gait",
+        choices=["alternating_tetrapod", "ripple", "tripod"],
+        default="alternating_tetrapod",
+        help="select the gait type to use (default: alternating_tetrapod)",
+    )
 
     actions = parser.add_subparsers(dest="action", required=True)
     stand = actions.add_parser("stand", help="move all legs to the standing pose")
@@ -102,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         config,
         bus,
         sleep=(lambda _seconds: None) if args.simulate else time.sleep,
+        gait_type=args.gait
     )
 
     try:
